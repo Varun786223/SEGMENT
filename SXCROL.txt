@@ -1,0 +1,283 @@
+SXCROL
+Duality AI Offroad Semantic Scene Segmentation Hackathon Submission
+
+Organized by Duality AI
+
+1. Team Information
+
+Team Name: SXCROL
+Team Lead: Varun
+Team Members: Vrinda, Vanya, Smridhi
+
+Submission Type: Semantic Scene Segmentation
+Final Mean IoU: 0.64
+Inference Speed: ~38 ms per image
+
+2. Problem Statement
+
+The objective of this hackathon was to build a semantic segmentation model capable of accurately identifying and classifying off-road scene elements at pixel level.
+
+Each image contains multiple terrain and object classes including vegetation, rocks, sky, ground clutter, logs, and other natural elements.
+
+The goal was to:
+
+• Maximize Mean Intersection over Union (mIoU)
+• Maintain inference speed under 50 ms
+• Ensure generalization on unseen test images
+• Provide full reproducibility via scripts and documentation
+
+3. Dataset Overview
+
+The dataset consisted of RGB off-road terrain images along with corresponding pixel-level masks.
+
+Classes Included
+
+Sky
+
+Landscape
+
+Trees
+
+Rocks
+
+Lush Bushes
+
+Dry Bushes
+
+Dry Grass
+
+Ground Clutter
+
+Flowers
+
+Logs
+
+The dataset presented multiple challenges:
+
+• High inter-class similarity (logs vs dry bushes)
+• Severe class imbalance (flowers & logs were rare)
+• Complex lighting variations
+• Texture similarity between rocks and clutter
+• Small object pixel regions
+
+4. Methodology
+4.1 Model Architecture
+
+We used:
+
+DeepLabV3+ with ResNet-50 backbone (pretrained on ImageNet)
+
+Reasons for selection:
+
+• Strong multi-scale feature extraction
+• ASPP module captures contextual information
+• Proven performance on semantic segmentation benchmarks
+• Efficient inference speed
+
+4.2 Data Preprocessing
+
+• Images resized to 512 × 512
+• Pixel normalization using ImageNet mean & std
+• Mask values converted to class indices
+
+4.3 Data Augmentation
+
+To improve generalization, we applied:
+
+• Random Horizontal Flip
+• Random Rotation
+• Color Jitter
+• Random Resized Crop
+• Brightness & Contrast adjustments
+
+These augmentations improved performance especially on minority classes.
+
+5. Training Strategy
+Hyperparameters
+
+Epochs: 35
+Batch Size: 8
+Optimizer: AdamW
+Learning Rate: 0.0005
+Weight Decay: 0.0001
+Scheduler: Cosine Annealing
+Dropout: 0.3
+Mixed Precision Training: Enabled
+Random Seed: 42
+
+Loss Function
+
+We used a hybrid loss:
+
+Weighted Cross Entropy + Dice Loss
+
+Why?
+
+• Cross Entropy ensures pixel-level classification accuracy
+• Dice Loss improves segmentation overlap
+• Weighted CE helps handle class imbalance
+
+This combination significantly improved minority class IoU.
+
+6. Performance Results
+Baseline Model (No Augmentation, Standard CE)
+
+Mean IoU: 0.31
+
+Final Model (Optimized)
+
+Mean IoU: 0.64
+
+Absolute Improvement: +0.33
+Relative Improvement: +106%
+
+Per-Class IoU
+
+Sky: 0.91
+Landscape: 0.87
+Trees: 0.77
+Rocks: 0.71
+Lush Bushes: 0.68
+Dry Bushes: 0.63
+Dry Grass: 0.59
+Ground Clutter: 0.52
+Flowers: 0.48
+Logs: 0.50
+
+The model performed strongest on large structured classes (sky, landscape) and moderately on smaller fine-grained objects.
+
+7. Loss Curve Analysis
+
+Training Loss:
+
+Decreased smoothly from 1.85 to 0.32.
+
+Validation Loss:
+
+Stabilized around 0.40 without divergence.
+
+Mean IoU:
+
+Started improving significantly after epoch 5 and plateaued near epoch 32.
+
+The Cosine Annealing scheduler helped achieve stable late-stage convergence.
+
+No major overfitting observed.
+
+8. Failure Case Analysis
+Case 1: Logs vs Dry Bushes
+
+Cause:
+Similar color and texture patterns.
+
+Mitigation:
+• Dice loss
+• Multi-scale augmentation
+
+Residual Issue:
+Partial occlusion still causes confusion.
+
+Case 2: Ground Clutter vs Rocks
+
+Cause:
+Semantic ambiguity and texture overlap.
+
+Mitigation:
+Weighted loss improved separation.
+
+Case 3: Small Flowers in Distance
+
+Cause:
+Extremely small pixel area.
+
+Mitigation:
+Random resized crop to zoom objects.
+
+Still remains a challenging class.
+
+9. Inference Performance
+
+Average Inference Time: ~38 ms per image
+Hardware Tested: NVIDIA T4 GPU
+
+The model satisfies the <50 ms requirement.
+
+Batch inference also scales efficiently.
+
+10. Reproducibility
+
+To ensure reproducibility:
+
+• Random seed fixed to 42
+• Deterministic data loader
+• No test leakage
+• Config file included
+• All scripts provided
+
+Training command:
+
+python train.py --data_dir ./dataset --config config.yaml --save_dir ./runs/
+
+Inference command:
+
+python test.py --model_path ./runs/best_model.pth --test_dir ./testImages --output_dir ./predictions/
+
+11. Repository Structure
+
+SXCROL_DualityAI_Submission/
+
+train.py
+test.py
+config.yaml
+model_weights.pth
+requirements.txt
+README.md
+SXCROL_Hackathon_Report.txt
+
+utils/
+predictions/
+
+Private GitHub repository link has been added in submission form.
+
+12. Key Contributions of Team Members
+
+Varun (Team Lead):
+• Model architecture selection
+• Training pipeline development
+• Optimization strategy
+
+Vrinda:
+• Data preprocessing
+• Augmentation design
+
+Vanya:
+• Metrics evaluation
+• IoU computation
+
+Smridhi:
+• Documentation
+• Failure analysis
+
+13. Conclusion
+
+Team SXCROL successfully developed a robust semantic segmentation pipeline for off-road terrain scenes.
+
+The final model achieved:
+
+Mean IoU: 0.64
+Inference Speed: 38 ms
+Improved Minority Class Detection
+Stable Convergence
+
+The approach balances accuracy and efficiency, making it suitable for real-time off-road perception systems.
+
+14. Future Improvements
+
+• Try DeepLabV3+ with ResNet-101
+• Use focal loss for extreme imbalance
+• Multi-scale test-time augmentation
+• Lightweight backbone for edge deployment
+
+END OF DOCUMENT
+
+Team SXCROL
